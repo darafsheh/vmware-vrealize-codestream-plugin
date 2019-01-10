@@ -24,10 +24,17 @@
        <f:entry title="State" field="state">
           <f:select />
         </f:entry>
+        
+        <f:entry title="Credentials">
+            <c:select name="credentialId" field="credentialId" value="${site.credentialId}"/>
+          </f:entry>
+        
 
       <f:entry title="Execute and Wait"  field="waitExec">
                 <f:checkbox name="waitExec" />
       </f:entry>
+      
+      
 
        <f:entry>
              <f:repeatable name="pipelineParams" field="pipelineParams" noAddButton="false" add="Add Parameter">

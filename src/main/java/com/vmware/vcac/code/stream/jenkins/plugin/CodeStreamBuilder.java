@@ -1,4 +1,13 @@
 package com.vmware.vcac.code.stream.jenkins.plugin;
+import com.cloudbees.jenkins.plugins.sshcredentials.SSHAuthenticator;
+import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserListBoxModel;
+import com.cloudbees.jenkins.plugins.sshcredentials.impl.JSchConnector;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+
+import hudson.security.ACL;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -6,11 +15,13 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.vmware.vcac.code.stream.jenkins.plugin.CodeStreamBuilder.DescriptorImpl.CodeStreamEnvAction;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.PipelineParam;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.PluginParam;
 import com.vmware.vcac.code.stream.jenkins.plugin.util.EnvVariableResolver;
@@ -22,15 +33,18 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.EnvironmentContributingAction;
+import hudson.model.ItemGroup;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import static java.util.Arrays.asList;
 import hudson.util.ListBoxModel;
-
+import jenkins.model.Jenkins;
 
 import static hudson.Util.fixEmptyAndTrim;
 
@@ -52,6 +66,7 @@ import static hudson.Util.fixEmptyAndTrim;
  * @author Rishi Saraf
  */
 public class CodeStreamBuilder extends Builder implements Serializable {
+	public static final List<DomainRequirement> NO_REQUIREMENTS = Collections.<DomainRequirement> emptyList();
 
     private String serverUrl;
     private String userName;
@@ -59,19 +74,22 @@ public class CodeStreamBuilder extends Builder implements Serializable {
     private String tenant;
     private String pipelineName;
     private String state;
+    private String credentialsId;
     private boolean waitExec;
     private List<PipelineParam> pipelineParams;
 
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public CodeStreamBuilder(String serverUrl, String userName, String password, String tenant, String pipelineName, String state, boolean waitExec, List<PipelineParam> pipelineParams) {
+    public CodeStreamBuilder(String serverUrl, String userName, String password, String tenant, String pipelineName, String state, String credentialsId, boolean waitExec, List<PipelineParam> pipelineParams) {
         this.serverUrl = fixEmptyAndTrim(serverUrl);
         this.userName = fixEmptyAndTrim(userName);
         this.password = fixEmptyAndTrim(password);
         this.tenant = fixEmptyAndTrim(tenant);
         this.pipelineName = fixEmptyAndTrim(pipelineName);
         this.state = fixEmptyAndTrim(pipelineName);
+        this.credentialsId = fixEmptyAndTrim(credentialsId);
+
         this.waitExec = waitExec;
         this.pipelineParams = pipelineParams;
     }
@@ -96,8 +114,11 @@ public class CodeStreamBuilder extends Builder implements Serializable {
         return pipelineName;
     }
     
-    public String getStatee() {
+    public String getState() {
         return state;
+    }
+    public String getCredentialsId() {
+        return credentialsId;
     }
 
 
@@ -262,8 +283,15 @@ public class CodeStreamBuilder extends Builder implements Serializable {
                         userName+':'+s);
             return m;
         }
+        
+		@SuppressWarnings("deprecation")
+		public ListBoxModel doFillCredentialIdItems(final @AncestorInPath ItemGroup<?> context) {
+			final List<StandardUsernameCredentials> credentials = CredentialsProvider.lookupCredentials(
+					StandardUsernameCredentials.class, context, ACL.SYSTEM, NO_REQUIREMENTS);
 
-    }
+			return new SSHUserListBoxModel().withEmptySelection().withMatching(
+					SSHAuthenticator.matcher(JSchConnector.class), credentials);
+		}
 
     public static class CodeStreamEnvAction implements EnvironmentContributingAction {
         private transient Map<String, String> data = new HashMap<String, String>();
@@ -301,5 +329,6 @@ public class CodeStreamBuilder extends Builder implements Serializable {
             return data;
         }
     }
+}
 }
 
