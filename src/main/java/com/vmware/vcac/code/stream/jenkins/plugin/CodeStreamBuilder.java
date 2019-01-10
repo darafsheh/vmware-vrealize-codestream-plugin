@@ -28,6 +28,8 @@ import hudson.util.FormValidation;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import static java.util.Arrays.asList;
+import hudson.util.ListBoxModel;
 
 
 import static hudson.Util.fixEmptyAndTrim;
@@ -56,18 +58,20 @@ public class CodeStreamBuilder extends Builder implements Serializable {
     private String password;
     private String tenant;
     private String pipelineName;
+    private String state;
     private boolean waitExec;
     private List<PipelineParam> pipelineParams;
 
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public CodeStreamBuilder(String serverUrl, String userName, String password, String tenant, String pipelineName, boolean waitExec, List<PipelineParam> pipelineParams) {
+    public CodeStreamBuilder(String serverUrl, String userName, String password, String tenant, String pipelineName, String state, boolean waitExec, List<PipelineParam> pipelineParams) {
         this.serverUrl = fixEmptyAndTrim(serverUrl);
         this.userName = fixEmptyAndTrim(userName);
         this.password = fixEmptyAndTrim(password);
         this.tenant = fixEmptyAndTrim(tenant);
         this.pipelineName = fixEmptyAndTrim(pipelineName);
+        this.state = fixEmptyAndTrim(pipelineName);
         this.waitExec = waitExec;
         this.pipelineParams = pipelineParams;
     }
@@ -91,6 +95,11 @@ public class CodeStreamBuilder extends Builder implements Serializable {
     public String getPipelineName() {
         return pipelineName;
     }
+    
+    public String getStatee() {
+        return state;
+    }
+
 
     public List<PipelineParam> getPipelineParams() {
         return pipelineParams;
@@ -245,6 +254,13 @@ public class CodeStreamBuilder extends Builder implements Serializable {
                 return FormValidation.ok();
 
             return FormValidation.ok();
+        }
+        public ListBoxModel doFillStateItems(@QueryParameter String userName) {
+            ListBoxModel m = new ListBoxModel();
+            for (String s : asList("A","B","C"))
+                m.add(String.format("State %s in %s", s, userName),
+                        userName+':'+s);
+            return m;
         }
 
     }

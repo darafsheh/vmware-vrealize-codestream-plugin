@@ -20,6 +20,10 @@
       <f:entry title="Release Pipeline Name"  field="pipelineName">
           <f:textbox name="pipelineName" />
       </f:entry>
+      
+       <f:entry title="State" field="state">
+          <f:select />
+        </f:entry>
 
       <f:entry title="Execute and Wait"  field="waitExec">
                 <f:checkbox name="waitExec" />
