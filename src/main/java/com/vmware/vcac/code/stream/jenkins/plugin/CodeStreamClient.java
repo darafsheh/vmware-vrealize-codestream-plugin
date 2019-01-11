@@ -8,8 +8,14 @@ import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.List;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -18,6 +24,10 @@ import com.google.gson.JsonParser;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.PipelineParam;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.PluginParam;
 import com.vmware.vcac.code.stream.jenkins.plugin.util.ReleasePipelineExecutionInfoParser;
+
+import hudson.model.Item;
+import hudson.security.ACL;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -40,6 +50,7 @@ public class CodeStreamClient {
     private String EXECUTE_PIPELINE = "";
     private String TOKEN_JSON = "{\"username\": \"%s\", \"password\": \"%s\", \"tenant\": \"%s\"}";
     private PluginParam params;
+	public static final List<DomainRequirement> NO_REQUIREMENTS = Collections.<DomainRequirement> emptyList();
 
     public CodeStreamClient(PluginParam params) throws IOException {
         this.params = params;
@@ -51,8 +62,16 @@ public class CodeStreamClient {
         this.token = populateToken();
     }
 
+	private StandardUsernamePasswordCredentials lookupCredentialsById(final String credentialId) {
+		final List<StandardUsernamePasswordCredentials> all = CredentialsProvider.lookupCredentials(
+				StandardUsernamePasswordCredentials.class, (Item) null, ACL.SYSTEM, NO_REQUIREMENTS);
+
+		return CredentialsMatchers.firstOrNull(all, CredentialsMatchers.withId(credentialId));
+	}
+
     private String populateToken() throws IOException {
-        String tokenPayload = String.format(TOKEN_JSON, params.getUserName(), params.getPassword(), params.getTenant());
+    	StandardUsernamePasswordCredentials credentials = lookupCredentialsById(params.getCredentialsId());
+        String tokenPayload = String.format(TOKEN_JSON, credentials.getUsername(), credentials.getPassword(), params.getTenant());
         HttpResponse httpResponse = this.post(FETCH_TOKEN, tokenPayload);
         String responseAsJson = this.getResponseAsJsonString(httpResponse);
         JsonObject stringJsonAsObject = getJsonObject(responseAsJson);

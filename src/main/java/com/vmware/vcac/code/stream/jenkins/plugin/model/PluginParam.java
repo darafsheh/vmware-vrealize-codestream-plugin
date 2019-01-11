@@ -16,15 +16,18 @@ public class PluginParam implements Serializable {
     private String password;
     private String tenant;
     private String pipelineName;
+    private String state;
+    private String credentialsId;
     private boolean waitExec;
     private List<PipelineParam> pipelineParams;
 
-    public PluginParam(String serverUrl, String userName, String password, String tenant, String pipelineName, boolean waitExec, List<PipelineParam> pipelineParams) {
+    public PluginParam(String serverUrl, String userName, String password, String tenant, String pipelineName,String state, String credentialsId, boolean waitExec, List<PipelineParam> pipelineParams) {
         this.serverUrl = serverUrl;
         this.userName = userName;
         this.password = password;
         this.tenant = tenant;
         this.pipelineName = pipelineName;
+        this.credentialsId = credentialsId;
         this.waitExec = waitExec;
         this.pipelineParams = pipelineParams;
     }
@@ -40,7 +43,6 @@ public class PluginParam implements Serializable {
     public String getPassword() {
         return password;
     }
-
     public String getTenant() {
         return tenant;
     }
@@ -48,6 +50,14 @@ public class PluginParam implements Serializable {
     public String getPipelineName() {
         return pipelineName;
     }
+    public String getState() {
+    	return state;
+    }
+    
+    public String getCredentialsId() {
+    	return credentialsId;
+    }
+
 
     public List<PipelineParam> getPipelineParams() {
         return pipelineParams;
