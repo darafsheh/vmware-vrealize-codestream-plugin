@@ -1,4 +1,20 @@
 package com.vmware.vcac.code.stream.jenkins.plugin;
+
+import com.vmware.vcac.code.stream.jenkins.plugin.util.EnvVariableResolver;
+import hudson.EnvVars;
+import hudson.Extension;
+import hudson.util.ListBoxModel;
+import hudson.Launcher;
+import hudson.Util;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.EnvironmentContributingAction;
+import hudson.model.ItemGroup;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Builder;
+import hudson.util.FormValidation;	
+import hudson.security.ACL;
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHAuthenticator;
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserListBoxModel;
 import com.cloudbees.jenkins.plugins.sshcredentials.impl.JSchConnector;
@@ -8,7 +24,6 @@ import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
-import hudson.security.ACL;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -25,26 +40,12 @@ import java.util.logging.Logger;
 import com.vmware.vcac.code.stream.jenkins.plugin.CodeStreamBuilder.DescriptorImpl.CodeStreamEnvAction;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.PipelineParam;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.PluginParam;
-import com.vmware.vcac.code.stream.jenkins.plugin.util.EnvVariableResolver;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.Launcher;
-import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.EnvironmentContributingAction;
-import hudson.model.ItemGroup;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
-import hudson.util.FormValidation;
 
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import static java.util.Arrays.asList;
-import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 
 import static hudson.Util.fixEmptyAndTrim;
