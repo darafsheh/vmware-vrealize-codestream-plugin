@@ -12,19 +12,14 @@ import org.apache.commons.lang.StringUtils;
 public class PluginParam implements Serializable {
 
     private String serverUrl;
-    private String userName;
-    private String password;
     private String tenant;
     private String pipelineName;
-    private String state;
     private String credentialsId;
     private boolean waitExec;
     private List<PipelineParam> pipelineParams;
 
-    public PluginParam(String serverUrl, String userName, String password, String tenant, String pipelineName,String state, String credentialsId, boolean waitExec, List<PipelineParam> pipelineParams) {
+    public PluginParam(String serverUrl, String tenant, String pipelineName, String credentialsId, boolean waitExec, List<PipelineParam> pipelineParams) {
         this.serverUrl = serverUrl;
-        this.userName = userName;
-        this.password = password;
         this.tenant = tenant;
         this.pipelineName = pipelineName;
         this.credentialsId = credentialsId;
@@ -36,22 +31,12 @@ public class PluginParam implements Serializable {
         return serverUrl;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
     public String getTenant() {
         return tenant;
     }
 
     public String getPipelineName() {
         return pipelineName;
-    }
-    public String getState() {
-    	return state;
     }
     
     public String getCredentialsId() {
@@ -73,13 +58,13 @@ public class PluginParam implements Serializable {
             throw new IOException("CodeStream server url cannot be empty");
         }
 
-        if (StringUtils.isBlank(this.getUserName())) {
-            throw new IOException("CodeStream server username cannot be empty");
-        }
-
-        if (StringUtils.isBlank(this.getPassword())) {
-            throw new IOException("CodeStream server password cannot be empty");
-        }
+//        if (StringUtils.isBlank(this.getUserName())) {
+//            throw new IOException("CodeStream server username cannot be empty");
+//        }
+//
+//        if (StringUtils.isBlank(this.getPassword())) {
+//            throw new IOException("CodeStream server password cannot be empty");
+//        }
 
         if (StringUtils.isBlank(this.getTenant())) {
             throw new IOException("CodeStream tenant cannot be empty");

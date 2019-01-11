@@ -71,11 +71,8 @@ public class CodeStreamBuilder extends Builder implements Serializable {
 	public static final List<DomainRequirement> NO_REQUIREMENTS = Collections.<DomainRequirement> emptyList();
 
     private String serverUrl;
-    private String userName;
-    private String password;
     private String tenant;
     private String pipelineName;
-    private String state;
     private String credentialsId;
     private boolean waitExec;
     private List<PipelineParam> pipelineParams;
@@ -83,13 +80,10 @@ public class CodeStreamBuilder extends Builder implements Serializable {
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public CodeStreamBuilder(String serverUrl, String userName, String password, String tenant, String pipelineName, String state, String credentialsId, boolean waitExec, List<PipelineParam> pipelineParams) {
+    public CodeStreamBuilder(String serverUrl,  String tenant, String pipelineName, String credentialsId, boolean waitExec, List<PipelineParam> pipelineParams) {
         this.serverUrl = fixEmptyAndTrim(serverUrl);
-        this.userName = fixEmptyAndTrim(userName);
-        this.password = fixEmptyAndTrim(password);
         this.tenant = fixEmptyAndTrim(tenant);
         this.pipelineName = fixEmptyAndTrim(pipelineName);
-        this.state = fixEmptyAndTrim(state);
         this.credentialsId = fixEmptyAndTrim(credentialsId);
 
         this.waitExec = waitExec;
@@ -100,13 +94,6 @@ public class CodeStreamBuilder extends Builder implements Serializable {
         return serverUrl;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 
     public String getTenant() {
         return tenant;
@@ -116,9 +103,6 @@ public class CodeStreamBuilder extends Builder implements Serializable {
         return pipelineName;
     }
     
-    public String getState() {
-        return state;
-    }
     public String getCredentialsId() {
         return credentialsId;
     }
@@ -136,8 +120,8 @@ public class CodeStreamBuilder extends Builder implements Serializable {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
         EnvVariableResolver helper = new EnvVariableResolver(build, listener);
-        PluginParam param = new PluginParam(helper.replaceBuildParamWithValue(serverUrl), helper.replaceBuildParamWithValue(userName),
-                helper.replaceBuildParamWithValue(password), helper.replaceBuildParamWithValue(tenant), helper.replaceBuildParamWithValue(pipelineName), helper.replaceBuildParamWithValue(state), helper.replaceBuildParamWithValue(credentialsId), waitExec, helper.replaceBuildParamWithValue(pipelineParams));
+        PluginParam param = new PluginParam(helper.replaceBuildParamWithValue(serverUrl),
+                 helper.replaceBuildParamWithValue(tenant), helper.replaceBuildParamWithValue(pipelineName), helper.replaceBuildParamWithValue(credentialsId), waitExec, helper.replaceBuildParamWithValue(pipelineParams));
         logger.println("Starting CodeStream pipeline execution of pipeline : " + param.getPipelineName());
         param.validate();
         CodeStreamPipelineCallable callable = new CodeStreamPipelineCallable(param);
@@ -285,6 +269,27 @@ public class CodeStreamBuilder extends Builder implements Serializable {
                         userName+':'+s);
             return m;
         }
+        
+        public ListBoxModel doFillPipelineNameItems(@QueryParameter String credentialsId, @QueryParameter String tenant, @QueryParameter String serverUrl) {
+        	System.out.println("TEST LOGGING1");
+        	ListBoxModel m = new ListBoxModel();
+            PluginParam param = new PluginParam(serverUrl, tenant, "none", credentialsId, false, null);
+//            param.validate();
+            try {
+				CodeStreamClient codeStreamClient = new CodeStreamClient(param);
+				String[] pipelineNames = codeStreamClient.fetchPipelines();
+				if(pipelineNames != null) {
+					for(String s : pipelineNames) {
+						m.add(s);
+					}
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            return m;
+        }
+
         
 		@SuppressWarnings("deprecation")
 		public ListBoxModel doFillCredentialsIdItems(final @AncestorInPath ItemGroup<?> context) {

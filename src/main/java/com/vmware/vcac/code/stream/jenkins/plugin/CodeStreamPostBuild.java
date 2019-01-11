@@ -37,11 +37,8 @@ import static hudson.Util.fixEmptyAndTrim;
 public class CodeStreamPostBuild extends Notifier implements Serializable {
 
     private String serverUrl;
-    private String userName;
-    private String password;
     private String tenant;
     private String pipelineName;
-    private String state;
     private String credentialsId;
     private boolean waitExec;
     private List<PipelineParam> pipelineParams;
@@ -49,13 +46,10 @@ public class CodeStreamPostBuild extends Notifier implements Serializable {
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public CodeStreamPostBuild(String serverUrl, String userName, String password, String tenant, String pipelineName,String state, String credentialsId, boolean waitExec, List<PipelineParam> pipelineParams) {
+    public CodeStreamPostBuild(String serverUrl, String tenant, String pipelineName, String credentialsId, boolean waitExec, List<PipelineParam> pipelineParams) {
         this.serverUrl = fixEmptyAndTrim(serverUrl);
-        this.userName = fixEmptyAndTrim(userName);
-        this.password = fixEmptyAndTrim(password);
         this.tenant = fixEmptyAndTrim(tenant);
         this.pipelineName = fixEmptyAndTrim(pipelineName);
-        this.state = fixEmptyAndTrim(pipelineName);
         this.credentialsId = fixEmptyAndTrim(credentialsId);
         this.waitExec = waitExec;
         this.pipelineParams = pipelineParams;
@@ -65,13 +59,6 @@ public class CodeStreamPostBuild extends Notifier implements Serializable {
         return serverUrl;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 
     public String getTenant() {
         return tenant;
@@ -79,9 +66,6 @@ public class CodeStreamPostBuild extends Notifier implements Serializable {
 
     public String getPipelineName() {
         return pipelineName;
-    }
-    public String getState() {
-        return state;
     }
     public String getCredentialsId() {
         return credentialsId;
@@ -103,8 +87,8 @@ public class CodeStreamPostBuild extends Notifier implements Serializable {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         PrintStream logger = listener.getLogger();
         EnvVariableResolver helper = new EnvVariableResolver(build, listener);
-        PluginParam param = new PluginParam(helper.replaceBuildParamWithValue(serverUrl), helper.replaceBuildParamWithValue(userName),
-                helper.replaceBuildParamWithValue(password), helper.replaceBuildParamWithValue(tenant), helper.replaceBuildParamWithValue(pipelineName), helper.replaceBuildParamWithValue(state), helper.replaceBuildParamWithValue(credentialsId), waitExec, helper.replaceBuildParamWithValue(pipelineParams));
+        PluginParam param = new PluginParam(helper.replaceBuildParamWithValue(serverUrl),
+                 helper.replaceBuildParamWithValue(tenant), helper.replaceBuildParamWithValue(pipelineName), helper.replaceBuildParamWithValue(credentialsId), waitExec, helper.replaceBuildParamWithValue(pipelineParams));
         logger.println("Starting CodeStream pipeline execution of pipeline : " + param.getPipelineName());
         param.validate();
         CodeStreamPipelineCallable callable = new CodeStreamPipelineCallable(param);

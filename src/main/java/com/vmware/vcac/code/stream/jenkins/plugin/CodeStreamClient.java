@@ -48,6 +48,7 @@ public class CodeStreamClient {
     private String FETCH_TOKEN = "";
     private String CHECK_EXEC_STATUS = "";
     private String FETCH_PIPELINE = "";
+    private String FETCH_PIPELINES = "";
     private String EXECUTE_PIPELINE = "";
     private String TOKEN_JSON = "{\"username\": \"%s\", \"password\": \"%s\", \"tenant\": \"%s\"}";
     private PluginParam params;
@@ -57,6 +58,7 @@ public class CodeStreamClient {
         this.params = params;
         this.FETCH_TOKEN = params.getServerUrl() + "/identity/api/tokens";
         String codeStreamApiUrl = params.getServerUrl() + "/release-management-service/api/release-pipelines/";
+        this.FETCH_PIPELINES = codeStreamApiUrl;
         this.FETCH_PIPELINE = codeStreamApiUrl + "?name=%s";
         this.EXECUTE_PIPELINE = codeStreamApiUrl + "%s/executions";
         this.CHECK_EXEC_STATUS = codeStreamApiUrl + "%s/executions/%s";
@@ -86,6 +88,26 @@ public class CodeStreamClient {
         }
         return token;
     }
+    public String[] fetchPipelines() throws IOException{
+        JsonObject response = null;
+        String url = FETCH_PIPELINES;
+        HttpResponse pipelineResponse = get(url);
+        String responseAsJson = this.getResponseAsJsonString(pipelineResponse);
+        JsonObject stringJsonAsObject = getJsonObject(responseAsJson);
+        JsonElement contentElement = stringJsonAsObject.get("content");
+        String[] pipelineNames = null; 
+        if (contentElement == null) {
+            handleError(stringJsonAsObject);
+        } else {
+            JsonArray contents = contentElement.getAsJsonArray();
+        	pipelineNames = new String[contents.size()];
+            for(int i = 0; i < contents.size(); i++) {
+            	pipelineNames[i] = contents.get(i).getAsJsonObject().get("name").getAsString();
+            }
+          
+        }
+        return pipelineNames;
+    }
 
     public JsonObject fetchPipeline(String pipelineName) throws IOException {
         JsonObject response = null;
@@ -114,7 +136,6 @@ public class CodeStreamClient {
     private String getEncodedString(String pipelineName) throws UnsupportedEncodingException {
         return URLEncoder.encode(pipelineName, "UTF-8");
     }
-
     public JsonObject executePipeline(String pipelineId, List<PipelineParam> pipelineParams) throws IOException {
         JsonObject response = null;
         String url = String.format(EXECUTE_PIPELINE, pipelineId);
@@ -223,4 +244,5 @@ public class CodeStreamClient {
     }
 
 }
+
 
