@@ -22,11 +22,11 @@
       </f:entry>
       
        <f:entry title="State" field="state">
-          <f:select />
+          <f:select name="state" />
         </f:entry>
         
-        <f:entry title="Credentials" field="credentialId" >
-            <f:select name="credentialId"/>
+        <f:entry title="Credentials" field="credentialsId" >
+            <f:select name="credentialsId"/>
           </f:entry>
         
 

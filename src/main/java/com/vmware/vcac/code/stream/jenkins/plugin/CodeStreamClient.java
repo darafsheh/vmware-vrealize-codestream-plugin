@@ -3,6 +3,7 @@ package com.vmware.vcac.code.stream.jenkins.plugin;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -71,7 +72,9 @@ public class CodeStreamClient {
 
     private String populateToken() throws IOException {
     	StandardUsernamePasswordCredentials credentials = lookupCredentialsById(params.getCredentialsId());
-        String tokenPayload = String.format(TOKEN_JSON, credentials.getUsername(), credentials.getPassword(), params.getTenant());
+//        throw new IOException("BUILDING TOKEN FOR: " + credentials.getUsername() + credentials.getPassword().getPlainText());
+
+        String tokenPayload = String.format(TOKEN_JSON, credentials.getUsername(), credentials.getPassword().getPlainText(), params.getTenant());
         HttpResponse httpResponse = this.post(FETCH_TOKEN, tokenPayload);
         String responseAsJson = this.getResponseAsJsonString(httpResponse);
         JsonObject stringJsonAsObject = getJsonObject(responseAsJson);

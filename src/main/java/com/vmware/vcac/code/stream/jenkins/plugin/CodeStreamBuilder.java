@@ -5,6 +5,7 @@ import com.cloudbees.jenkins.plugins.sshcredentials.impl.JSchConnector;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
 import hudson.security.ACL;
@@ -87,7 +88,7 @@ public class CodeStreamBuilder extends Builder implements Serializable {
         this.password = fixEmptyAndTrim(password);
         this.tenant = fixEmptyAndTrim(tenant);
         this.pipelineName = fixEmptyAndTrim(pipelineName);
-        this.state = fixEmptyAndTrim(pipelineName);
+        this.state = fixEmptyAndTrim(state);
         this.credentialsId = fixEmptyAndTrim(credentialsId);
 
         this.waitExec = waitExec;
@@ -135,7 +136,7 @@ public class CodeStreamBuilder extends Builder implements Serializable {
         PrintStream logger = listener.getLogger();
         EnvVariableResolver helper = new EnvVariableResolver(build, listener);
         PluginParam param = new PluginParam(helper.replaceBuildParamWithValue(serverUrl), helper.replaceBuildParamWithValue(userName),
-                helper.replaceBuildParamWithValue(password), helper.replaceBuildParamWithValue(tenant), helper.replaceBuildParamWithValue(pipelineName), waitExec, helper.replaceBuildParamWithValue(pipelineParams));
+                helper.replaceBuildParamWithValue(password), helper.replaceBuildParamWithValue(tenant), helper.replaceBuildParamWithValue(pipelineName), helper.replaceBuildParamWithValue(state), helper.replaceBuildParamWithValue(credentialsId), waitExec, helper.replaceBuildParamWithValue(pipelineParams));
         logger.println("Starting CodeStream pipeline execution of pipeline : " + param.getPipelineName());
         param.validate();
         CodeStreamPipelineCallable callable = new CodeStreamPipelineCallable(param);
@@ -285,9 +286,9 @@ public class CodeStreamBuilder extends Builder implements Serializable {
         }
         
 		@SuppressWarnings("deprecation")
-		public ListBoxModel doFillCredentialIdItems(final @AncestorInPath ItemGroup<?> context) {
-			final List<StandardUsernameCredentials> credentials = CredentialsProvider.lookupCredentials(
-					StandardUsernameCredentials.class, context, ACL.SYSTEM, NO_REQUIREMENTS);
+		public ListBoxModel doFillCredentialsIdItems(final @AncestorInPath ItemGroup<?> context) {
+			final List<StandardUsernamePasswordCredentials> credentials = CredentialsProvider.lookupCredentials(
+					StandardUsernamePasswordCredentials.class, context, ACL.SYSTEM, NO_REQUIREMENTS);
 
 			return new SSHUserListBoxModel().withEmptySelection().withMatching(
 					SSHAuthenticator.matcher(JSchConnector.class), credentials);
