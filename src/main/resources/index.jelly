@@ -3,5 +3,5 @@
   This view is used to render the installed plugins page.
 -->
 <div>
-  This plugin adds CodeStream support to Jenkins
+  This plugin adds CodeStream support to Jenkins. This is the new 2018 version of the plugin, redeveloped by Shar Darafsheh (sd@vampeo.com) 
 </div>

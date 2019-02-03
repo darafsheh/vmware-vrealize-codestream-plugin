@@ -50,6 +50,8 @@ import jenkins.model.Jenkins;
 
 import static hudson.Util.fixEmptyAndTrim;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Sample {@link Builder}.
  * <p/>
@@ -271,18 +273,38 @@ public class CodeStreamBuilder extends Builder implements Serializable {
         }
         
         public ListBoxModel doFillPipelineNameItems(@QueryParameter String credentialsId, @QueryParameter String tenant, @QueryParameter String serverUrl) {
-        	System.out.println("TEST LOGGING1");
+        	System.out.println("Checking for pipeline names...");
         	ListBoxModel m = new ListBoxModel();
             PluginParam param = new PluginParam(serverUrl, tenant, "none", credentialsId, false, null);
 //            param.validate();
             try {
-				CodeStreamClient codeStreamClient = new CodeStreamClient(param);
-				String[] pipelineNames = codeStreamClient.fetchPipelines();
-				if(pipelineNames != null) {
-					for(String s : pipelineNames) {
-						m.add(s);
+            	System.out.println("Printing variables123456...");
+            	System.out.println(serverUrl);
+            	System.out.println(tenant);
+            	System.out.println(credentialsId);
+            	if(StringUtils.isBlank(serverUrl)) {
+            		System.out.println("URL is Empty");
+            	}
+            	if(StringUtils.isBlank(tenant)) {
+            		System.out.println("Tenant is Empty");
+            	}
+            	if(StringUtils.isBlank(credentialsId)) {
+            		System.out.println("Cred is Empty");
+            	}
+            	
+            	if(StringUtils.isBlank(serverUrl) || StringUtils.isBlank(tenant) || StringUtils.isBlank(credentialsId)) {
+            		System.out.println("Waiting for credentials before checking for pipeline names...");
+            	} else {
+            		System.out.println("All fields are filled. Making the API call now...");
+	            	CodeStreamClient codeStreamClient = new CodeStreamClient(param);
+					String[] pipelineNames = codeStreamClient.fetchPipelines();
+					if(pipelineNames != null) {
+						for(String s : pipelineNames) {
+							m.add(s);
+						}
 					}
-				}
+            	}
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
