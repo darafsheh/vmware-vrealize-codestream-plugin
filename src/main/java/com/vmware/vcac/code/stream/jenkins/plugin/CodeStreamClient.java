@@ -137,11 +137,11 @@ public class CodeStreamClient {
         return URLEncoder.encode(pipelineName, "UTF-8");
     }
     public JsonObject executePipeline(String pipelineId, List<PipelineParam> pipelineParams) throws IOException {
-        JsonObject response = null;
+    	JsonObject response = null;
         String url = String.format(EXECUTE_PIPELINE, pipelineId);
         Gson gson = new Gson();
         String pipelineParamsArray = gson.toJson(pipelineParams);
-
+        System.out.println("HELLO - " + pipelineParams);
         String payload = String.format("{\"description\": \"%s\", \"pipelineParams\": %s}", "Executed from jenkins", pipelineParamsArray);
         HttpResponse httpResponse = this.post(url, payload);
         String responseAsJson = this.getResponseAsJsonString(httpResponse);

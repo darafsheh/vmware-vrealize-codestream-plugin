@@ -1,17 +1,20 @@
 package com.vmware.vcac.code.stream.jenkins.plugin;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.vmware.vcac.code.stream.jenkins.plugin.CodeStreamBuilder.DescriptorImpl;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.ExecutionStatus;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.PipelineParam;
 import com.vmware.vcac.code.stream.jenkins.plugin.model.PluginParam;
@@ -30,11 +33,14 @@ import static hudson.Util.fixEmptyAndTrim;
 public class CodeStreamPipelineCallable implements Callable<Map<String, String>, IOException>, Serializable {
     private AbstractBuild<?, ?> build;
     private PluginParam params;
-
-    public CodeStreamPipelineCallable(PluginParam params) {
+    private PrintStream logger;
+    public CodeStreamPipelineCallable(PluginParam params, PrintStream logger) {
         this.params = params;
+        this.logger = logger;
 
     }
+    
+
 
     @Override
     public Map<String, String> call() throws IOException {
@@ -49,15 +55,17 @@ public class CodeStreamPipelineCallable implements Callable<Map<String, String>,
             if (!status.equals("ACTIVATED")) {
                 throw new IOException(params.getPipelineName() + " is not activated");
             }
-
+            List<PipelineParam> pipelineParams = new ArrayList();
             if (!params.getPipelineParams().isEmpty()) {
                 for (PipelineParam userParam : params.getPipelineParams()) {
-                    PipelineParam defaultParam = defaultParams.get(fixEmptyAndTrim(userParam.getName()));
-                    defaultParam.setValue(fixEmptyAndTrim(userParam.getValue()));
+                	
+                    PipelineParam newParam = new PipelineParam( fixEmptyAndTrim(userParam.getValue()), fixEmptyAndTrim(userParam.getName()));
+                	pipelineParams.add(newParam);
+
                 }
             }
-
-            JsonObject execJsonRes = codeStreamClient.executePipeline(pipelineId, new ArrayList(defaultParams.values()));
+            
+            JsonObject execJsonRes = codeStreamClient.executePipeline(pipelineId, pipelineParams);
             JsonElement execIdElement = execJsonRes.get("id");
             if (execIdElement != null) {
                 String execId = execIdElement.getAsString();
@@ -66,6 +74,9 @@ public class CodeStreamPipelineCallable implements Callable<Map<String, String>,
                 if (params.isWaitExec()) {
                     ReleasePipelineExecutionInfoParser parser = codeStreamClient.getPipelineExecutionResponse(pipelineId, execId);
                     while (!parser.isPipelineCompleted()) {
+                    	logger.println("Waiting for pipeline execution to complete");
+                    	logger.println("Waiting 10 seconds...");
+
                         System.out.println("Waiting for pipeline execution to complete");
                         Thread.sleep(10 * 1000);
                         parser = codeStreamClient.getPipelineExecutionResponse(pipelineId, execId);
@@ -89,6 +100,7 @@ public class CodeStreamPipelineCallable implements Callable<Map<String, String>,
                 codeStreamClient.handleError(execJsonRes);
             }
         } catch (Exception e) {
+        	System.out.println(e.getMessage());
             throw new IOException(e.getMessage());
         }
         return data;

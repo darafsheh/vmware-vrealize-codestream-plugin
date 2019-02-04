@@ -91,7 +91,7 @@ public class CodeStreamPostBuild extends Notifier implements Serializable {
                  helper.replaceBuildParamWithValue(tenant), helper.replaceBuildParamWithValue(pipelineName), helper.replaceBuildParamWithValue(credentialsId), waitExec, helper.replaceBuildParamWithValue(pipelineParams));
         logger.println("Starting CodeStream pipeline execution of pipeline : " + param.getPipelineName());
         param.validate();
-        CodeStreamPipelineCallable callable = new CodeStreamPipelineCallable(param);
+        CodeStreamPipelineCallable callable = new CodeStreamPipelineCallable(param, logger);
         Map<String, String> envVariables = launcher.getChannel().call(callable);
         CodeStreamEnvAction action = new CodeStreamEnvAction();
         action.addAll(envVariables);
